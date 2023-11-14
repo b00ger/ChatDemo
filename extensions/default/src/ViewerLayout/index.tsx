@@ -10,6 +10,8 @@ import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
 
 import 'react-chat-widget/lib/styles.css';
 import './chat.css';
+import MicIcon from './icons/mic';
+import TextMode from './icons/text';
 import { hasPosition } from 'platform/core/src/utils/isDisplaySetReconstructable';
 
 function ViewerLayout({
@@ -31,6 +33,7 @@ function ViewerLayout({
   const { hangingProtocolService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
   const [chatEnabled, setChatEnabled] = useState(false);
+  const [speechToTextMode, setSpeechToTextMode] = useState(false);
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -151,14 +154,33 @@ function ViewerLayout({
           handleTextInputChange={onChatInputChange}
           launcher={customLauncher}
         />
-        <button
-          className="arbitrary"
-          onClick={() =>
-            addUserMessage('this is a message from outside text, use this same method for voice')
-          }
-        >
-          Post message from outside
-        </button>
+        <div className="sendPanel">
+          <button
+            className="arbitrary"
+            onClick={() => {
+              setSpeechToTextMode(true);
+              addUserMessage('this is a message from outside text, use this same method for voice');
+            }}
+          >
+            <MicIcon size={'30px'} />
+          </button>
+          <button
+            className="arbitrary"
+            onClick={() => {
+              setSpeechToTextMode(false);
+              addUserMessage('this is a message from outside text, use this same method for voice');
+            }}
+          >
+            <TextMode
+              height={'30px'}
+              width={'90px'}
+            />
+          </button>
+        </div>
+        <div className="disclaimer">
+          This application is for demonstration purposes only. HOPPR is not developing an
+          application for clinical use.
+        </div>
       </div>
       <div style={{ width: '60%', boxSizing: 'border-box', float: 'left' }}>
         <div
