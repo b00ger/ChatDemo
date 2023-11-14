@@ -6,14 +6,8 @@ import { ServicesManager, HangingProtocolService, CommandsManager } from '@ohif/
 import { useAppConfig } from '@state';
 import ViewerHeader from './ViewerHeader';
 import SidePanelWithServices from '../Components/SidePanelWithServices';
-import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
-
-import 'react-chat-widget/lib/styles.css';
-import './chat.css';
-import MicIcon from './icons/mic';
-import TextMode from './icons/text';
-import { hasPosition } from 'platform/core/src/utils/isDisplaySetReconstructable';
-
+import './viewer.css';
+import ChatBox from './components/Chat';
 function ViewerLayout({
   // From Extension Module Params
   extensionManager,
@@ -32,8 +26,6 @@ function ViewerLayout({
 
   const { hangingProtocolService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
-  const [chatEnabled, setChatEnabled] = useState(false);
-  const [speechToTextMode, setSpeechToTextMode] = useState(false);
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -112,32 +104,6 @@ function ViewerLayout({
   const leftPanelComponents = leftPanels.map(getPanelData);
   const rightPanelComponents = rightPanels.map(getPanelData);
   const viewportComponents = viewports.map(getViewportComponentData);
-  console.log(hangingProtocolService);
-  const onChatInputChange = event => {
-    console.log(event);
-    // setChatInputValue(value);
-  };
-  const customLauncher = handleToggle => {
-    if (chatEnabled) {
-      return;
-    }
-    setChatEnabled(true);
-    handleToggle();
-  };
-  const handleNewUserMessage = newMessage => {
-    console.log(`New message incoming! ${newMessage}`);
-    addResponseMessage('do something with ' + newMessage);
-    fetch('https://webhook.site/c55adc77-59f8-4bc1-a57c-b7d7849e0834', {
-      method: 'POST',
-      body: newMessage,
-    })
-      .then(response => response.json())
-      .then(data => {
-        addResponseMessage(JSON.stringify(data));
-      })
-      .catch(error => console.log(error));
-    // Now send the message throught the backend API
-  };
   return (
     <div>
       <ViewerHeader
@@ -145,44 +111,10 @@ function ViewerLayout({
         extensionManager={extensionManager}
         servicesManager={servicesManager}
       />
-      <div className="sidePanel">
-        <Widget
-          title={hangingProtocolService.activeStudy?.ModalitiesInStudy[0]}
-          subtitle={''}
-          handleNewUserMessage={handleNewUserMessage}
-          emojis={false}
-          handleTextInputChange={onChatInputChange}
-          launcher={customLauncher}
-        />
-        <div className="sendPanel">
-          <button
-            className="arbitrary"
-            onClick={() => {
-              setSpeechToTextMode(true);
-              addUserMessage('this is a message from outside text, use this same method for voice');
-            }}
-          >
-            <MicIcon size={'30px'} />
-          </button>
-          <button
-            className="arbitrary"
-            onClick={() => {
-              setSpeechToTextMode(false);
-              addUserMessage('this is a message from outside text, use this same method for voice');
-            }}
-          >
-            <TextMode
-              height={'30px'}
-              width={'90px'}
-            />
-          </button>
-        </div>
-        <div className="disclaimer">
-          This application is for demonstration purposes only. HOPPR is not developing an
-          application for clinical use.
-        </div>
+      <div className={'sidePanel'}>
+        <ChatBox title={hangingProtocolService.activeStudy?.ModalitiesInStudy[0]} />
       </div>
-      <div style={{ width: '60%', boxSizing: 'border-box', float: 'left' }}>
+      <div className={'viewerPanel'}>
         <div
           className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
           style={{ height: 'calc(100vh - 52px' }}
