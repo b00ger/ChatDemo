@@ -6,6 +6,11 @@ import { ServicesManager, HangingProtocolService, CommandsManager } from '@ohif/
 import { useAppConfig } from '@state';
 import ViewerHeader from './ViewerHeader';
 import SidePanelWithServices from '../Components/SidePanelWithServices';
+import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
+
+import 'react-chat-widget/lib/styles.css';
+import './chat.css';
+import { hasPosition } from 'platform/core/src/utils/isDisplaySetReconstructable';
 
 function ViewerLayout({
   // From Extension Module Params
@@ -25,6 +30,7 @@ function ViewerLayout({
 
   const { hangingProtocolService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
+  const [chatEnabled, setChatEnabled] = useState(false);
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -82,10 +88,10 @@ function ViewerLayout({
       // hangingProtocolService to finish applying the viewport matching to each viewport,
       // however, this might not be the only approach to set the loading indicator to false. we need to explore this further.
       () => {
+        console.log('changed-protocol-hangingservice');
         setShowLoadingIndicator(false);
       }
     );
-
     return () => {
       unsubscribe();
     };
@@ -103,7 +109,32 @@ function ViewerLayout({
   const leftPanelComponents = leftPanels.map(getPanelData);
   const rightPanelComponents = rightPanels.map(getPanelData);
   const viewportComponents = viewports.map(getViewportComponentData);
-
+  console.log(hangingProtocolService);
+  const onChatInputChange = event => {
+    console.log(event);
+    // setChatInputValue(value);
+  };
+  const customLauncher = handleToggle => {
+    if (chatEnabled) {
+      return;
+    }
+    setChatEnabled(true);
+    handleToggle();
+  };
+  const handleNewUserMessage = newMessage => {
+    console.log(`New message incoming! ${newMessage}`);
+    addResponseMessage('do something with ' + newMessage);
+    fetch('https://webhook.site/c55adc77-59f8-4bc1-a57c-b7d7849e0834', {
+      method: 'POST',
+      body: newMessage,
+    })
+      .then(response => response.json())
+      .then(data => {
+        addResponseMessage(JSON.stringify(data));
+      })
+      .catch(error => console.log(error));
+    // Now send the message throught the backend API
+  };
   return (
     <div>
       <ViewerHeader
@@ -111,46 +142,68 @@ function ViewerLayout({
         extensionManager={extensionManager}
         servicesManager={servicesManager}
       />
-      <div
-        className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
-        style={{ height: 'calc(100vh - 52px' }}
-      >
-        <React.Fragment>
-          {showLoadingIndicator && <LoadingIndicatorProgress className="h-full w-full bg-black" />}
-          {/* LEFT SIDEPANELS */}
-          {leftPanelComponents.length ? (
-            <ErrorBoundary context="Left Panel">
-              <SidePanelWithServices
-                side="left"
-                activeTabIndex={leftPanelDefaultClosed ? null : 0}
-                tabs={leftPanelComponents}
-                servicesManager={servicesManager}
-              />
-            </ErrorBoundary>
-          ) : null}
-          {/* TOOLBAR + GRID */}
-          <div className="flex h-full flex-1 flex-col">
-            <div className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-black">
-              <ErrorBoundary context="Grid">
-                <ViewportGridComp
+      <div className="sidePanel">
+        <Widget
+          title={hangingProtocolService.activeStudy?.ModalitiesInStudy[0]}
+          subtitle={''}
+          handleNewUserMessage={handleNewUserMessage}
+          emojis={false}
+          handleTextInputChange={onChatInputChange}
+          launcher={customLauncher}
+        />
+        <button
+          className="arbitrary"
+          onClick={() =>
+            addUserMessage('this is a message from outside text, use this same method for voice')
+          }
+        >
+          Post message from outside
+        </button>
+      </div>
+      <div style={{ width: '60%', boxSizing: 'border-box', float: 'left' }}>
+        <div
+          className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
+          style={{ height: 'calc(100vh - 52px' }}
+        >
+          <React.Fragment>
+            {showLoadingIndicator && (
+              <LoadingIndicatorProgress className="h-full w-full bg-black" />
+            )}
+            {/* LEFT SIDEPANELS */}
+            {leftPanelComponents.length ? (
+              <ErrorBoundary context="Left Panel">
+                <SidePanelWithServices
+                  side="left"
+                  activeTabIndex={leftPanelDefaultClosed ? null : 0}
+                  tabs={leftPanelComponents}
                   servicesManager={servicesManager}
-                  viewportComponents={viewportComponents}
-                  commandsManager={commandsManager}
                 />
               </ErrorBoundary>
+            ) : null}
+            {/* TOOLBAR + GRID */}
+            <div className="flex h-full flex-1 flex-col">
+              <div className="relative flex h-full flex-1 items-center justify-center overflow-hidden bg-black">
+                <ErrorBoundary context="Grid">
+                  <ViewportGridComp
+                    servicesManager={servicesManager}
+                    viewportComponents={viewportComponents}
+                    commandsManager={commandsManager}
+                  />
+                </ErrorBoundary>
+              </div>
             </div>
-          </div>
-          {rightPanelComponents.length ? (
-            <ErrorBoundary context="Right Panel">
-              <SidePanelWithServices
-                side="right"
-                activeTabIndex={rightPanelDefaultClosed ? null : 0}
-                tabs={rightPanelComponents}
-                servicesManager={servicesManager}
-              />
-            </ErrorBoundary>
-          ) : null}
-        </React.Fragment>
+            {rightPanelComponents.length ? (
+              <ErrorBoundary context="Right Panel">
+                <SidePanelWithServices
+                  side="right"
+                  activeTabIndex={rightPanelDefaultClosed ? null : 0}
+                  tabs={rightPanelComponents}
+                  servicesManager={servicesManager}
+                />
+              </ErrorBoundary>
+            ) : null}
+          </React.Fragment>
+        </div>
       </div>
     </div>
   );
