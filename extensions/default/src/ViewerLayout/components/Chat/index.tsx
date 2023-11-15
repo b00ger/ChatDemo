@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Chat from './lib/index.js';
 import OpenAI, { toFile } from 'openai';
 import './lib/styles.css';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import './chat.css';
 import MicIcon from './icons/mic';
@@ -36,7 +36,7 @@ const ChatSideBar = (opts: { title: string }) => {
   /// DAN H'S DANGER ZONE
 
   const mode = "althea"
-  const openai = new OpenAI({apiKey: REACT_APP_OPENAI_KEY, dangerouslyAllowBrowser: true})
+  const openai = new OpenAI({ apiKey: REACT_APP_OPENAI_KEY, dangerouslyAllowBrowser: true })
   const [recording, setRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const [altheaText, setAltheaText] = useState("")
@@ -46,7 +46,7 @@ const ChatSideBar = (opts: { title: string }) => {
   const [socket, setSocket] = useState(null)
   const [sentences, setSentences] = useState([])
   const [words, setWords] = useState([])
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isSentenceComplete, setIsSentenceComplete] = useState([true, true])
   const [messageId, setMessageId] = useState(null)
   var thread = null
   var assistant = null
@@ -104,25 +104,31 @@ const ChatSideBar = (opts: { title: string }) => {
   // Observe sentences
   useEffect(() => {
     function playNext(sentence) {
+      setIsSentenceComplete([false, false])
       const text = sentence[0]
       console.log("Starting sentence " + text)
       const audio = new Audio(sentence[1])
       audio.onended = (_) => {
-        console.log("Finished sentence " + text)
-        setIsPlaying(false)
-        setSentences(prev => prev.slice(1))
+        console.log("Finished saying sentence " + text)
+        setIsSentenceComplete(complete => {
+          if (!complete[1]) return [true, false]
+          if (complete[0]) return complete
+          console.log("Popping sentence in audio")
+          setSentences(s => s.slice(1))
+          return [true, true]
+        })
       }
       setWords(prev => prev.concat(text.split(" ")))
       audio.play()
     }
     setLoadingVisible(false)
-    console.log("There are now " + sentences.length + " sentences")
+    console.debug("There are now " + sentences.length + " sentences")
     if (sentences.length === 0) return
-    setIsPlaying(prev => {
-      if (!prev) {
+    setIsSentenceComplete(complete => {
+      if (complete[0] && complete[1]) {
         playNext(sentences[0])
       }
-      return true
+      return complete
     })
   }, [sentences])
 
@@ -134,23 +140,32 @@ const ChatSideBar = (opts: { title: string }) => {
         setMessageId(id => {
           if (id == null) {
             const newId = uuidv4().toString()
-            console.log("Adding new message " + newId)
             addResponseMessage(text, newId)
             return newId
           }
-          console.log("Updating message " + id)
           deleteMessages(1, id)
           addResponseMessage(text, id)
           return id
         })
         return text
       })
+      var timeout = word.endsWith(",") ? 600 : 220
       setTimeout(() => {
         setWords(prev => prev.slice(1))
-      }, 220)
+      }, timeout)
     }
-    console.log("There are now " + words.length + " words")
-    if (words.length === 0) return
+    console.debug("There are now " + words.length + " words")
+    if (words.length === 0) {
+      setIsSentenceComplete(complete => {
+        console.log("Finished words for sentence")
+        if (!complete[0]) return [false, true]
+        if (complete[1]) return complete
+        console.log("Popping sentence in words")
+        setSentences(s => s.slice(1))
+        return [true, true]
+      })
+      return
+    }
     showNext(words[0])
   }, [words])
 
@@ -224,7 +239,7 @@ const ChatSideBar = (opts: { title: string }) => {
     );
     const run = await openai.beta.threads.runs.create(
       thread.id,
-      {assistant_id: assistant.id}
+      { assistant_id: assistant.id }
     )
     while (true) {
       const result = await openai.beta.threads.runs.retrieve(
@@ -313,14 +328,14 @@ const ChatSideBar = (opts: { title: string }) => {
         >
           <input
             className={'textEntryComponent'}
-            disabled={isPlaying}
+            disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
             onChange={handleSearchInputChange}
             value={searchInputField}
           />
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={isPlaying}
+          disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
           onClick={() => {
             setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
