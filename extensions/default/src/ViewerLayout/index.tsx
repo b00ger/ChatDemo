@@ -28,7 +28,7 @@ function ViewerLayout({
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState('');
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -88,15 +88,30 @@ function ViewerLayout({
       () => {
         console.log('changed-protocol-hangingservice');
         setShowLoadingIndicator(false);
-        const instance = hangingProtocolService.activeStudy?.series[0].instances[0]
-        var title = ""
+        const instance = hangingProtocolService.activeStudy?.series[0].instances[0];
+        let title = '';
         if (instance != null) {
-          title += "Modality: " + instance.Modality
-          if (instance.BodyPartExamined) {
-            title += " Body Part: " + instance.BodyPartExamined
+          const { Modality, BodyPartExamined, AcquisitionDate } = instance;
+          title += 'Modality: ' + Modality;
+          if (BodyPartExamined) {
+            title += ' Body Part: ' + BodyPartExamined;
+          }
+          if (AcquisitionDate) {
+            console.log(
+              AcquisitionDate.slice(0, 4),
+              AcquisitionDate.slice(4, 6),
+              AcquisitionDate.slice(6, 8)
+            );
+            title +=
+              ` Date: ` +
+              new Date(
+                AcquisitionDate.slice(0, 4),
+                Number(AcquisitionDate.slice(4, 6)) - 1,
+                AcquisitionDate.slice(6, 8)
+              ).toDateString();
           }
         }
-        setTitle(title)
+        setTitle(title);
       }
     );
 
@@ -124,9 +139,7 @@ function ViewerLayout({
         extensionManager={extensionManager}
         servicesManager={servicesManager}
       />
-      <div className={'sidePanel'}>
-        {(title.length > 0) && <ChatBox title={title} />}
-      </div>
+      <div className={'sidePanel'}>{title.length > 0 && <ChatBox title={title} />}</div>
       <div className={'viewerPanel'}>
         <div
           className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
