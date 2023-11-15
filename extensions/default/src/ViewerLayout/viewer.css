@@ -1,0 +1,12 @@
+.sidePanel {
+  width: 34%;
+  background-color: #090C29;
+  box-sizing: border-box;
+  float: left;
+  height: calc(100vh - 52px);
+}
+.viewerPanel {
+  width: 66%;
+  box-sizing: border-box;
+  float: left;
+}

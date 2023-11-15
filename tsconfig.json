@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
-    "checkJs": true,
+    "checkJs": false,
     // Ensure that Babel can safely transpile files in the TypeScript project
     "isolatedModules": true,
     "emitDeclarationOnly": true,
@@ -12,6 +12,7 @@
     "declaration": true,
     "moduleResolution": "node",
     "outDir": "./dist",
+    "allowJs": true,
     "paths": {
       "@ohif/core": ["platform/core/src"],
       "@ohif/ui": ["platform/ui/src"],

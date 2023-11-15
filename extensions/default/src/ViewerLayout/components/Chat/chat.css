@@ -1,0 +1,128 @@
+.chatSidebar > .rcw-widget-container {
+  position: relative;
+  border-radius: 0px;
+  width:100%;
+  margin-bottom:0px;
+}
+.chatSidebar .rcw-conversation-container {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border-radius: 0px;
+
+}
+.chatSidebar .rcw-picker-btn {
+  display: none;
+}
+.chatSidebar .rcw-conversation-container .rcw-header {
+  background: #161c54;
+  border-radius: 0px;
+}
+.chatSidebar .rcw-timestamp {
+  color:#FFF;
+}
+.chatSidebar .rcw-conversation-container .rcw-sender {
+  background: #161c54;
+  border-radius: 0px;
+  display: none;
+}
+.chatSidebar .rcw-messages-container {
+  background:#090C29;
+  height: 60vh;
+  max-height: 1000px;
+
+}
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+
+  background: #090C29;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #35395e;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #35395e;
+}
+
+.chatSidebar .rcw-launcher {
+  display:none
+}
+.chatSidebar .rcw-picker-btn, .rcw-send {
+  background: none;
+  display: none;
+}
+.chatSidebar .rcw-new-message {
+  background-color: #35395e;
+  color:#FFF;
+  width: calc(100% - 10px);
+  display: none;
+}
+.chatSidebar .sendPanel {
+  padding: .5em 1em;
+  background: #161c54;
+  display: block;
+  min-height:66px;
+}
+.chatSidebar .sendPanel button{
+  width:10%;
+  float:left;
+  margin: 0%;
+  border-radius: 0px 5px 5px 0px;
+  background: #161c54;
+  text-align: center;
+  padding:.5em;
+  border: 1px solid #444444;
+  border-radius: 6px;
+  cursor:pointer
+}
+.chatSidebar .sendPanel button.micButton {
+  border-radius: 5px 0px 0px 5px;
+}
+.chatSidebar .sendPanel button.sendButton {
+  border-radius: 0px 5px 5px 0px;
+}
+
+.chatSidebar .sendPanel button div svg{
+  margin-left: auto;
+  margin-right:auto;
+}
+.chatSidebar .disclaimer {
+  text-align: center;
+  color:#FFF;
+  font-size: .9em;
+  padding: 1em;
+  margin-top:1em;
+  display: block;
+  clear: both;
+}
+.chatSidebar .speechToTextMode .rcw-new-message {
+  display: none;
+}
+.chatSidebar .sendPanel .textEntryComponent:focus{
+  outline: none;
+  border:1px solid #444444
+}
+.chatSidebar .sendPanel .textEntryComponent{
+  background: #0d1136;
+  border:1px solid #444444;
+  border-left:none;
+  border-right: none;
+  float:left;
+  border-radius: 0px;
+  padding: 10px 5px;
+  resize: none;
+  width: calc(77%);
+  height:48px;
+  color:#FFFFFF;
+}
+.arbitrary {
+  color: #FFF
+}
