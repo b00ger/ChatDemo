@@ -1,10 +1,10 @@
 import React from 'react';
 
-const Mic = (opts: { size: string }) => {
+const Mic = (opts: { size: string, color: string }) => {
   return (
     <div>
       <svg
-        fill="#ffffff"
+        fill={opts.color}
         height={opts.size}
         width={opts.size}
         version="1.1"
