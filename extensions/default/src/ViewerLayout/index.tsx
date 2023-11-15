@@ -26,6 +26,8 @@ function ViewerLayout({
 
   const { hangingProtocolService } = servicesManager.services;
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
+  const [chatEnabled, setChatEnabled] = useState(false);
+  const [speechToTextMode, setSpeechToTextMode] = useState(false);
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical

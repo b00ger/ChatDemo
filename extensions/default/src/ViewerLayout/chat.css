@@ -1,0 +1,68 @@
+.sidePanel {
+  width: 34%;
+  background-color: #090C29;
+  box-sizing: border-box;
+  float: left;
+  height: calc(100vh - 52px);
+}
+.sidePanel > .rcw-widget-container {
+  position: relative;
+  border-radius: 0px;
+  width:100%;
+}
+.sidePanel .rcw-conversation-container {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border-radius: 0px;
+
+}
+.sidePanel .rcw-picker-btn {
+  display: none;
+}
+.sidePanel .rcw-conversation-container .rcw-header {
+  background: #161c54;
+  border-radius: 0px;
+}
+.sidePanel .rcw-conversation-container .rcw-sender {
+  background: #161c54;
+  border-radius: 0px;
+}
+.sidePanel .rcw-messages-container {
+  background:#090C29;
+  height: 60vh;
+  max-height: 1000px;
+}
+.sidePanel .rcw-launcher {
+  display:none
+}
+.sidePanel .rcw-picker-btn, .rcw-send {
+  background: none;
+}
+.sidePanel .rcw-new-message {
+  background-color: #35395e;
+  color:#FFF;
+}
+.sidePanel .sendPanel {
+  padding: .5em 1em
+}
+.sidePanel .sendPanel button{
+  width:40%;
+  margin: 0% 5%;
+  background: #161c54;
+  text-align: center;
+  padding:.5em
+}
+.sidePanel .sendPanel button div svg{
+  margin-left: auto;
+  margin-right:auto;
+}
+.sidePanel .disclaimer {
+  text-align: center;
+  color:#FFF;
+  font-size: .9em;
+  padding: 1em;
+}
+.arbitrary {
+  color: #FFF
+
+}
