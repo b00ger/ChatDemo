@@ -319,12 +319,20 @@ const ChatSideBar = (opts: { title: string }) => {
       />
       <div className="sendPanel">
         <button
+<<<<<<< HEAD
           disabled={speechToTextMode}
           className={`arbitrary micButton ${recording ? 'recording' : ''}`}
           onClick={updateRecording}
           aria-details={'Press to start recording then press again to stop.'}
+=======
+          disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
+          className="arbitrary micButton"
+          onMouseDown={startRecording}
+          onMouseUp={stopRecording}
+          onMouseLeave={stopRecording}
+>>>>>>> dd3ecaa81a48825eb8642c8e547177c4014a2704
         >
-          <MicIcon size={'30px'} />
+          <MicIcon size={'30px'} color={recording ? "red" : "white"} />
         </button>
         <form
           onSubmit={e => {
@@ -351,8 +359,8 @@ const ChatSideBar = (opts: { title: string }) => {
         </button>
       </div>
       <div className="disclaimer">
-        This application is for demonstration purposes only. HOPPR is not developing an application
-        for clinical use.
+        This application is for research and development purposes only. <br />HOPPR
+        is not developing this application for clinical use.
       </div>
     </div>
   );
