@@ -94,21 +94,16 @@ function ViewerLayout({
           const { Modality, BodyPartExamined, AcquisitionDate } = instance;
           title += 'Modality: ' + Modality;
           if (BodyPartExamined) {
-            title += ' Body Part: ' + BodyPartExamined;
+            title += ' | Body Part: ' + BodyPartExamined;
           }
           if (AcquisitionDate) {
-            console.log(
+            let date = new Date(
               AcquisitionDate.slice(0, 4),
-              AcquisitionDate.slice(4, 6),
+              Number(AcquisitionDate.slice(4, 6)) - 1,
               AcquisitionDate.slice(6, 8)
-            );
+            )
             title +=
-              ` Date: ` +
-              new Date(
-                AcquisitionDate.slice(0, 4),
-                Number(AcquisitionDate.slice(4, 6)) - 1,
-                AcquisitionDate.slice(6, 8)
-              ).toDateString();
+              ' | Date: ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
           }
         }
         setTitle(title);
