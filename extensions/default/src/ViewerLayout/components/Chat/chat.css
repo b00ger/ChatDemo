@@ -86,6 +86,10 @@
 .chatSidebar .sendPanel button.micButton {
   border-radius: 5px 0px 0px 5px;
 }
+.chatSidebar .sendPanel button.recording {
+  background-color: rgb(192, 23, 25);
+}
+
 .chatSidebar .sendPanel button.sendButton {
   border-radius: 0px 5px 5px 0px;
 }

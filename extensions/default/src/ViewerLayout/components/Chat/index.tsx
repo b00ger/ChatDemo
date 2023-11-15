@@ -320,8 +320,9 @@ const ChatSideBar = (opts: { title: string }) => {
       <div className="sendPanel">
         <button
           disabled={speechToTextMode}
-          className="arbitrary micButton"
+          className={`arbitrary micButton ${recording ? 'recording' : ''}`}
           onClick={updateRecording}
+          aria-details={'Press to start recording then press again to stop.'}
         >
           <MicIcon size={'30px'} />
         </button>
@@ -333,14 +334,14 @@ const ChatSideBar = (opts: { title: string }) => {
         >
           <input
             className={'textEntryComponent'}
-            disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
+            disabled={!isSentenceComplete[0] || !isSentenceComplete[0] || recording}
             onChange={handleSearchInputChange}
             value={searchInputField}
           />
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
+          disabled={!isSentenceComplete[0] || !isSentenceComplete[0] || recording}
           onClick={() => {
             setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
