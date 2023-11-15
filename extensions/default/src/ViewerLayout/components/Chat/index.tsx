@@ -1,40 +1,38 @@
-import React, { useState } from 'react';
-import { Widget, addResponseMessage, addUserMessage, toggleMsgLoader } from 'react-chat-widget';
-import 'react-chat-widget/lib/styles.css';
+import React, { useState, useEffect } from 'react';
+import * as Chat from './lib/index.js';
+import './lib/styles.css';
+
 import './chat.css';
 import MicIcon from './icons/mic';
 import TextMode from './icons/text';
-
+const { Widget, addResponseMessage, addUserMessage, toggleMsgLoader } = Chat
 const ChatSideBar = (opts: { title: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');
-  const onChatInputChange = event => {
-    console.log(event);
-    // setChatInputValue(value);
-  };
-  const customLauncher = handleToggle => {
+
+  const customLauncher = launchChatMethod => {
     if (chatEnabled) {
       return;
     }
     setChatEnabled(true);
-    handleToggle();
+    launchChatMethod();
   };
   const handleSearchInputChange = e => {
     setSearchInputField(e.target.value);
   };
-  const handleSpeechToTextMessage = newMessage => {
-    console.log(`New message incoming! ${newMessage}`);
-    addUserMessage(newMessage);
-    toggleMsgLoader();
-    setTimeout(() => {
-      addResponseMessage('do something with ' + newMessage);
-      toggleMsgLoader();
-    }, 5000);
-  };
+  // const handleSpeechToTextMessage = newMessage => {
+  //   addUserMessage(newMessage);
+  //   setSearchInputField('');
+  //   toggleMsgLoader();
+  //   setTimeout(() => {
+  //     addResponseMessage('do something with ' + newMessage);
+  //     toggleMsgLoader();
+  //   }, 5000);
+  // };
   const handleNewUserMessage = newMessage => {
-    console.log(`New message incoming! ${newMessage}`);
     addUserMessage(newMessage);
+    setSearchInputField('');
     toggleMsgLoader();
     setTimeout(() => {
       addResponseMessage('do something with ' + newMessage);
@@ -60,20 +58,21 @@ const ChatSideBar = (opts: { title: string }) => {
         subtitle={''}
         handleNewUserMessage={handleNewUserMessage}
         emojis={false}
-        handleTextInputChange={onChatInputChange}
         launcher={customLauncher}
       />
       <div className="sendPanel">
         <button
           disabled={speechToTextMode}
           className="arbitrary micButton"
-          onClick={() => {
-            setSpeechToTextMode(true);
-            //You'd call this with the output of speech to text later, not here
-            handleSpeechToTextMessage(
-              'this is a message from outside text, use this same method for voice'
-            );
-          }}
+          onClick={() => {}}
+          // onClick={() => {
+          //   setSpeechToTextMode(true);
+          //   //You'd call this with the output of speech to text later, not here
+          //   handleSpeechToTextMessage(
+          //     'this is a message from outside text, use this same method for voice'
+          //   );
+          // }
+          //}
         >
           <MicIcon size={'30px'} />
         </button>
@@ -86,6 +85,7 @@ const ChatSideBar = (opts: { title: string }) => {
           <input
             className={'textEntryComponent'}
             onChange={handleSearchInputChange}
+            value={searchInputField}
           />
         </form>
         <button

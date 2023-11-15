@@ -17,6 +17,9 @@
   background: #161c54;
   border-radius: 0px;
 }
+.chatSidebar .rcw-timestamp {
+  color:#FFF;
+}
 .chatSidebar .rcw-conversation-container .rcw-sender {
   background: #161c54;
   border-radius: 0px;
