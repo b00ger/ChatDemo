@@ -16,6 +16,12 @@
 .chatSidebar .rcw-conversation-container .rcw-header {
   background: #161c54;
   border-radius: 0px;
+  font-size: 16px;
+  padding:0px;
+}
+.chatSidebar .rcw-conversation-container .rcw-header h4 {
+  font-size: 16px;
+  padding:8px;
 }
 .chatSidebar .rcw-timestamp {
   color:#FFF;

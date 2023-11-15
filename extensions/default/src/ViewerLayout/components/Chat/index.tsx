@@ -319,20 +319,16 @@ const ChatSideBar = (opts: { title: string }) => {
       />
       <div className="sendPanel">
         <button
-<<<<<<< HEAD
-          disabled={speechToTextMode}
-          className={`arbitrary micButton ${recording ? 'recording' : ''}`}
-          onClick={updateRecording}
-          aria-details={'Press to start recording then press again to stop.'}
-=======
-          disabled={!isSentenceComplete[0] || !isSentenceComplete[0]}
+          disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
           className="arbitrary micButton"
           onMouseDown={startRecording}
           onMouseUp={stopRecording}
           onMouseLeave={stopRecording}
->>>>>>> dd3ecaa81a48825eb8642c8e547177c4014a2704
         >
-          <MicIcon size={'30px'} color={recording ? "red" : "white"} />
+          <MicIcon
+            size={'30px'}
+            color={recording ? 'red' : 'white'}
+          />
         </button>
         <form
           onSubmit={e => {
@@ -342,14 +338,14 @@ const ChatSideBar = (opts: { title: string }) => {
         >
           <input
             className={'textEntryComponent'}
-            disabled={!isSentenceComplete[0] || !isSentenceComplete[0] || recording}
+            disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
             onChange={handleSearchInputChange}
             value={searchInputField}
           />
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={!isSentenceComplete[0] || !isSentenceComplete[0] || recording}
+          disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
           onClick={() => {
             setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
@@ -359,8 +355,8 @@ const ChatSideBar = (opts: { title: string }) => {
         </button>
       </div>
       <div className="disclaimer">
-        This application is for research and development purposes only. <br />HOPPR
-        is not developing this application for clinical use.
+        This application is for research and development purposes only. <br />
+        HOPPR is not developing this application for clinical use.
       </div>
     </div>
   );
