@@ -3,11 +3,20 @@ import * as Chat from './lib/index.js';
 import OpenAI, { toFile } from 'openai';
 import './lib/styles.css';
 import { v4 as uuidv4 } from 'uuid';
+// import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 import './chat.css';
 import MicIcon from './icons/mic';
 import TextMode from './icons/text';
-import { REACT_APP_ALTHEA_URL, REACT_APP_OPENAI_KEY, sendTextPacket, setupPacket } from './env.js';
+import {
+  REACT_APP_ALTHEA_URL,
+  // REACT_APP_AWS_KEY,
+  // REACT_APP_AWS_SECRET,
+  REACT_APP_OPENAI_KEY,
+  lookup,
+  sendTextPacket,
+  setupPacket,
+} from './env.js';
 const {
   Widget,
   addResponseMessage,
@@ -16,7 +25,7 @@ const {
   deleteMessages,
   dropMessages,
 } = Chat;
-const ChatSideBar = (opts: { title: string }) => {
+const ChatSideBar = (opts: { title: string, studyId: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');
@@ -34,7 +43,7 @@ const ChatSideBar = (opts: { title: string }) => {
   const handleNewUserMessage = newMessage => {
     sendMessage(newMessage);
   };
-  const { title } = opts;
+  const { title, studyId } = opts;
 
   /// DAN H'S DANGER ZONE
 
@@ -61,21 +70,44 @@ const ChatSideBar = (opts: { title: string }) => {
     }
     const ws = new WebSocket(REACT_APP_ALTHEA_URL);
     setSocket(ws);
-    ws.onopen = () => {
+    ws.onopen = async () => {
       if (mode !== 'althea') {
         return;
       }
+      // console.log('Retrieving studies from S3')
+      // const client = new S3Client({
+      //   credentials: {
+      //     accessKeyId: REACT_APP_AWS_KEY,
+      //     secretAccessKey: REACT_APP_AWS_SECRET
+      //   }
+      // })
+      // const response = await client.send(
+      //   new GetObjectCommand({
+      //     Bucket: 'chat-demo-artifacts',
+      //     Key: 'test.json'
+      //   })
+      // )
+
+      // const body = await response.Body?.transformToString()
+      // if (body == null) {
+      //   queueResponse("I was unable to contact the server to retrieve this study.")
+      //   return
+      // }
+
+      // const lookup = JSON.parse(body)
+
+      const report = lookup[studyId]
+      if (report == null) {
+        queueResponse(
+          "I was unable to find this particular study in our database."
+        )
+        return
+      }
+
       console.log('Setting up Althea');
       setupPacket.payload.receiveMode = 'text';
       setupPacket.payload.responseMode = 'text';
-      setupPacket.payload.report = `
-        FINDINGS:
-        The cardiac size is normal. The mediastinum is within normal limits. The lung fields are clear. The skeletal
-        structures are unremarkable.
-
-        IMPRESSION:
-        Normal chest x-ray.
-        `;
+      setupPacket.payload.report = report;
       // sending the init conditions
       ws.send(JSON.stringify(setupPacket));
     };
@@ -263,9 +295,13 @@ const ChatSideBar = (opts: { title: string }) => {
     const messages = await openai.beta.threads.messages.list(thread.id);
     //@ts-ignore
     const response = messages.data[0].content[0].text.value;
+    queueResponse(response)
+  };
+
+  const queueResponse = async (response) => {
     const speech = await createSpeechMp3(response);
     setSentences(prev => [...prev, [response, speech]]);
-  };
+  }
 
   const sendMessageAlthea = text => {
     sendTextPacket.streamSid = altheaStreamId;
@@ -281,9 +317,7 @@ const ChatSideBar = (opts: { title: string }) => {
       const lastChar = trimmed[trimmed.length - 1];
       if (lastChar === '.' || lastChar === '?' || lastChar === '!') {
         console.log('Adding sentence: ' + newText);
-        const mp3 = await createSpeechMp3(newText);
-        const tuple = [newText, mp3];
-        setSentences(prev => [...prev, tuple]);
+        queueResponse(newText)
         return '';
       }
       return newText;

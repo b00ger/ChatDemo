@@ -29,6 +29,7 @@ function ViewerLayout({
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [title, setTitle] = useState('');
+  const [studyId, setStudyId] = useState(null);
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -91,7 +92,13 @@ function ViewerLayout({
         const instance = hangingProtocolService.activeStudy?.series[0].instances[0];
         let title = '';
         if (instance != null) {
-          const { Modality, BodyPartExamined, AcquisitionDate } = instance;
+          const {
+            Modality,
+            BodyPartExamined,
+            AcquisitionDate,
+             StudyInstanceUID
+          } = instance;
+          setStudyId(StudyInstanceUID)
           title += 'Modality: ' + Modality;
           if (BodyPartExamined) {
             title += ' | Body Part: ' + BodyPartExamined;
@@ -134,7 +141,7 @@ function ViewerLayout({
         extensionManager={extensionManager}
         servicesManager={servicesManager}
       />
-      <div className={'sidePanel'}>{title.length > 0 && <ChatBox title={title} />}</div>
+      <div className={'sidePanel'}>{title.length > 0 && <ChatBox title={title} studyId={studyId} />}</div>
       <div className={'viewerPanel'}>
         <div
           className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
