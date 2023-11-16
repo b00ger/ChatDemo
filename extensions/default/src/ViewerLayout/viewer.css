@@ -10,3 +10,23 @@
   box-sizing: border-box;
   float: left;
 }
+
+.sidePanel .switchPanel {
+  height: 40px;
+  text-align: left;
+  padding-left: 16px;
+  display: flex;
+  justify-content: left;
+  padding-top: 8px;
+}
+
+.sidePanel .switchPanel .devSwitchLabel {
+  color: white;
+  font-size: 12px;
+  padding-right: 12px;
+}
+
+.sidePanel .switchPanel .devSwitch {
+  vertical-align: middle;
+  margin-top: 8px;
+}

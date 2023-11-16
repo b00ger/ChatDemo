@@ -319,7 +319,7 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
   /// END OF DAN H'S DANGER ZONE
 
   return (
-    <div className={'chatSidebar'}>
+    <div className='chatSidebar'>
       <Widget
         title={title}
         subtitle={''}

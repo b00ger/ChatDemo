@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import Switch from "react-switch";
 
 import { SidePanel, ErrorBoundary, LoadingIndicatorProgress } from '@ohif/ui';
 import { ServicesManager, HangingProtocolService, CommandsManager } from '@ohif/core';
@@ -8,6 +9,7 @@ import ViewerHeader from './ViewerHeader';
 import SidePanelWithServices from '../Components/SidePanelWithServices';
 import './viewer.css';
 import ChatBox from './components/Chat';
+import DevModePanel from './components/DevMode'
 function ViewerLayout({
   // From Extension Module Params
   extensionManager,
@@ -30,6 +32,7 @@ function ViewerLayout({
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [title, setTitle] = useState('');
   const [studyId, setStudyId] = useState(null);
+  const [isDevMode, setDevMode] = useState(false)
 
   /**
    * Set body classes (tailwindcss) that don't allow vertical
@@ -135,6 +138,10 @@ function ViewerLayout({
     };
   };
 
+  const handleEnvChange = (checked) => {
+    setDevMode(checked)
+  }
+
   const leftPanelComponents = leftPanels.map(getPanelData);
   const rightPanelComponents = rightPanels.map(getPanelData);
   const viewportComponents = viewports.map(getViewportComponentData);
@@ -145,7 +152,26 @@ function ViewerLayout({
         extensionManager={extensionManager}
         servicesManager={servicesManager}
       />
-      <div className={'sidePanel'}>{title.length > 0 && <ChatBox title={title} studyId={studyId} />}</div>
+      <div className={'sidePanel'}>
+        <div className={'switchPanel'}>
+          <span className={'devSwitchLabel'}>Developer Mode</span>
+          <Switch
+            onChange={handleEnvChange}
+            checked={isDevMode}
+            onColor="#001b3f"
+            onHandleColor="#003da5"
+            handleDiameter={20}
+            uncheckedIcon={false}
+            checkedIcon={false}
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            height={10}
+            width={24}
+          />
+        </div>
+        {title.length > 0 && !isDevMode && <ChatBox title={title} studyId={studyId} />}
+        {isDevMode && <DevModePanel />}
+      </div>
       <div className={'viewerPanel'}>
         <div
           className="relative flex w-full flex-row flex-nowrap items-stretch overflow-hidden bg-black"
