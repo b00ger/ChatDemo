@@ -13,7 +13,7 @@ import {
   // REACT_APP_AWS_KEY,
   // REACT_APP_AWS_SECRET,
   REACT_APP_OPENAI_KEY,
-  lookup,
+  REACT_APP_HOPPR_REPORTS_URL,
   sendTextPacket,
   setupPacket,
 } from './env.js';
@@ -25,7 +25,7 @@ const {
   deleteMessages,
   dropMessages,
 } = Chat;
-const ChatSideBar = (opts: { title: string, studyId: string }) => {
+const ChatSideBar = (opts: { title: string; studyId: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');
@@ -96,12 +96,12 @@ const ChatSideBar = (opts: { title: string, studyId: string }) => {
 
       // const lookup = JSON.parse(body)
 
-      const report = lookup[studyId]
+      const reportResponse = await fetch(REACT_APP_HOPPR_REPORTS_URL);
+      const allReports = await reportResponse.json();
+      const report = allReports[studyId];
       if (report == null) {
-        queueResponse(
-          "I was unable to find this particular study in our database."
-        )
-        return
+        queueResponse('I was unable to find this particular study in our database.');
+        return;
       }
 
       console.log('Setting up Althea');
@@ -295,13 +295,13 @@ const ChatSideBar = (opts: { title: string, studyId: string }) => {
     const messages = await openai.beta.threads.messages.list(thread.id);
     //@ts-ignore
     const response = messages.data[0].content[0].text.value;
-    queueResponse(response)
+    queueResponse(response);
   };
 
-  const queueResponse = async (response) => {
+  const queueResponse = async response => {
     const speech = await createSpeechMp3(response);
     setSentences(prev => [...prev, [response, speech]]);
-  }
+  };
 
   const sendMessageAlthea = text => {
     sendTextPacket.streamSid = altheaStreamId;
@@ -317,7 +317,7 @@ const ChatSideBar = (opts: { title: string, studyId: string }) => {
       const lastChar = trimmed[trimmed.length - 1];
       if (lastChar === '.' || lastChar === '?' || lastChar === '!') {
         console.log('Adding sentence: ' + newText);
-        queueResponse(newText)
+        queueResponse(newText);
         return '';
       }
       return newText;
