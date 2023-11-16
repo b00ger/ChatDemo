@@ -93,15 +93,19 @@ function ViewerLayout({
         let title = '';
         if (instance != null) {
           const {
-            Modality,
-            BodyPartExamined,
+            PatientSex,
+            PatientAge,
+            PatientName,
             AcquisitionDate,
-             StudyInstanceUID
+            StudyInstanceUID,
           } = instance;
           setStudyId(StudyInstanceUID)
-          title += 'Modality: ' + Modality;
-          if (BodyPartExamined) {
-            title += ' | Body Part: ' + BodyPartExamined;
+          title += 'Patient: ' + PatientName;
+          if (PatientAge) {
+            title += ' | Age: ' + PatientAge;
+          }
+          if (PatientSex) {
+            title += ' | Sex: ' + PatientSex
           }
           if (AcquisitionDate) {
             let date = new Date(

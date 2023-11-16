@@ -3,15 +3,12 @@ import * as Chat from './lib/index.js';
 import OpenAI, { toFile } from 'openai';
 import './lib/styles.css';
 import { v4 as uuidv4 } from 'uuid';
-// import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 import './chat.css';
 import MicIcon from './icons/mic';
 import TextMode from './icons/text';
 import {
   REACT_APP_ALTHEA_URL,
-  // REACT_APP_AWS_KEY,
-  // REACT_APP_AWS_SECRET,
   REACT_APP_OPENAI_KEY,
   REACT_APP_HOPPR_REPORTS_URL,
   sendTextPacket,
@@ -74,27 +71,6 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
       if (mode !== 'althea') {
         return;
       }
-      // console.log('Retrieving studies from S3')
-      // const client = new S3Client({
-      //   credentials: {
-      //     accessKeyId: REACT_APP_AWS_KEY,
-      //     secretAccessKey: REACT_APP_AWS_SECRET
-      //   }
-      // })
-      // const response = await client.send(
-      //   new GetObjectCommand({
-      //     Bucket: 'chat-demo-artifacts',
-      //     Key: 'test.json'
-      //   })
-      // )
-
-      // const body = await response.Body?.transformToString()
-      // if (body == null) {
-      //   queueResponse("I was unable to contact the server to retrieve this study.")
-      //   return
-      // }
-
-      // const lookup = JSON.parse(body)
 
       const reportResponse = await fetch(REACT_APP_HOPPR_REPORTS_URL);
       const allReports = await reportResponse.json();
