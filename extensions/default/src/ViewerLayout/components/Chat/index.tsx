@@ -117,7 +117,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       const allReports = await reportResponse.json();
       const report = allReports[studyId];
       if (report == null) {
-        queueResponse('I was unable to find this particular study in our database.');
+        await queueResponse('I was unable to find this particular study in our database.');
         return;
       }
       let name = config['botName']
@@ -166,11 +166,11 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   useEffect(() => {
     function playNext(sentence) {
       const text = sentence[0];
-      console.log('Starting sentence ' + text);
-      const mp3 = sentence[1]
+      const mp3 = sentence[1];
       if (mp3 != null) {
+        console.log('Starting audible sentence ' + text);
         setIsSentenceComplete([false, false]);
-        const audio = new Audio();
+        const audio = new Audio(mp3);
         audio.onended = _ => {
           console.log('Finished saying sentence ' + text);
           setIsSentenceComplete(complete => {
@@ -187,6 +187,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         };
         audio.play();
       } else {
+        console.log('Starting silent sentenc ' + text)
         setIsSentenceComplete([true, false]);
       }
       setWords(prev => prev.concat(text.split(' ')));
@@ -323,7 +324,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     const messages = await openai.beta.threads.messages.list(thread.id);
     //@ts-ignore
     const response = messages.data[0].content[0].text.value;
-    queueResponse(response);
+    await queueResponse(response);
   };
 
   const queueResponse = async (response, speak = true) => {
@@ -345,7 +346,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       const lastChar = trimmed[trimmed.length - 1];
       if (lastChar === '.' || lastChar === '?' || lastChar === '!') {
         console.log('Adding sentence: ' + newText);
-        queueResponse(newText);
+        await queueResponse(newText);
         return '';
       }
       return newText;
