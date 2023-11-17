@@ -2,7 +2,9 @@
   position: relative;
   border-radius: 0px;
   width:100%;
+  height: calc(100vh - 240px);
   margin-bottom:0px;
+  flex: 1 1 auto;
 }
 .chatSidebar .rcw-conversation-container {
   box-shadow: none;
@@ -33,9 +35,10 @@
 }
 .chatSidebar .rcw-messages-container {
   background:#090C29;
-  height: 60vh;
-  max-height: 1000px;
-
+}
+.chatSidebar {
+  display: flex;
+  flex-flow: column;
 }
 /* width */
 ::-webkit-scrollbar {
@@ -75,7 +78,7 @@
   padding: .5em 1em;
   background: #161c54;
   display: block;
-  min-height:66px;
+  flex: 0 1 auto;
 }
 .chatSidebar .sendPanel button{
   width:10%;
@@ -112,6 +115,7 @@
   margin-top:1em;
   display: block;
   clear: both;
+  flex: 0 1 auto;
 }
 .chatSidebar .speechToTextMode .rcw-new-message {
   display: none;
