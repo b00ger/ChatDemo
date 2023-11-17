@@ -323,6 +323,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
           await queueResponse('I was unable to find this particular study in our database.');
           return;
         }
+        setMessageId(null)
         let name = config['botName']
         console.log('Setting up Althea as ' + name);
         setupPacket.payload.receiveMode = 'text';
