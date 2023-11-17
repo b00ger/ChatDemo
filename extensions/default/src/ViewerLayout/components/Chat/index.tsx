@@ -420,9 +420,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
           <TextMode size={'30px'} />
         </button>
       </div>
-      <div className="disclaimer">
-        {config && config['disclaimerText']}
-      </div>
+      {config && <div className="disclaimer" dangerouslySetInnerHTML={{__html: config['disclaimerText']}} />}
     </div>
   );
 };
