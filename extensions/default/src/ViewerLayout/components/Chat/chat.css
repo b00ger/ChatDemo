@@ -33,6 +33,11 @@
   border-radius: 0px;
   display: none;
 }
+
+.chatSidebar .rcw-message-text {
+  max-width: 512px;
+}
+
 .chatSidebar .rcw-messages-container {
   background:#090C29;
   height: auto;
