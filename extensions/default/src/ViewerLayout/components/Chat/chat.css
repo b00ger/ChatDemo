@@ -10,7 +10,7 @@
   box-shadow: none;
   -webkit-box-shadow: none;
   border-radius: 0px;
-
+  height: 100%;
 }
 .chatSidebar .rcw-picker-btn {
   display: none;
@@ -35,6 +35,8 @@
 }
 .chatSidebar .rcw-messages-container {
   background:#090C29;
+  height: auto;
+  max-height: calc(100vh - 290px);
 }
 .chatSidebar {
   display: flex;

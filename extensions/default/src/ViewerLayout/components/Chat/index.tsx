@@ -405,7 +405,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         >
           <input
             className={'textEntryComponent'}
-            disabled={isDisabled}
+            disabled={!connected}
             onChange={handleSearchInputChange}
             value={searchInputField}
           />
