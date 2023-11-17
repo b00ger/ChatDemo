@@ -37,7 +37,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     setSearchInputField(e.target.value);
   };
   const handleNewUserMessage = newMessage => {
-    sendMessage(newMessage);
+    sendMessage(newMessage.trim());
   };
   const { instance, studyId } = opts;
 
@@ -78,7 +78,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const [altheaText, setAltheaText] = useState('');
   const [finalText, setFinalText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [altheaStreamId, setAltheaStreamId] = useState(null);
+  const altheaStreamId = useRef(null)
   const [sentences, setSentences] = useState([]);
   const [words, setWords] = useState([]);
   const [isSentenceComplete, setIsSentenceComplete] = useState([true, true]);
@@ -100,65 +100,18 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   }, []);
 
   useEffect(() => {
+    async function innerSetupOpenAI() {
+      await setupOpenAI()
+    }
     if (config == null) {
       return;
     }
     console.log('Config loaded. Starting chat experience.')
-    const ws = new WebSocket(REACT_APP_ALTHEA_URL);
-    socket.current = ws;
-    ws.onopen = async () => {
-      if (mode !== 'althea') {
-        return;
-      }
-
-      const reportResponse = await fetch(REACT_APP_HOPPR_REPORTS_URL);
-      const allReports = await reportResponse.json();
-      const report = allReports[studyId];
-      if (report == null) {
-        await queueResponse('I was unable to find this particular study in our database.');
-        return;
-      }
-      let name = config['botName']
-      console.log('Setting up Althea as ' + name);
-      setupPacket.payload.receiveMode = 'text';
-      setupPacket.payload.responseMode = 'text';
-      setupPacket.payload.botName = name
-      setupPacket.payload.report = report;
-      // sending the init conditions
-      ws.send(JSON.stringify(setupPacket));
-      setConnected(true)
-      await queueResponse(
-        config['welcomeMessage'].replace('{botName}', name).replace('{modality}', instance.Modality),
-        false
-      )
-    };
-
-    // websocket onclose event listener
-    ws.onclose = e => {
-      console.log(e);
-    };
-
-    // websocket onerror event listener
-    ws.onerror = error => {
-      console.error(
-        'WebSocket encountered error: ',
-        //@ts-ignore
-        error.message,
-        'Closing socket'
-      );
-
-      ws.close();
-    };
-    ws.onmessage = async evt => {
-      // on receiving a message from the server
-      const message = JSON.parse(evt.data);
-      if (message.event === 'start') {
-        console.log('Althea chat session ' + message.streamSid)
-        setAltheaStreamId(message.streamSid);
-      } else if (message.event === 'media') {
-        await handleAltheaResponse(message.media.payload);
-      }
-    };
+    if (mode === 'althea') {
+      setupAlthea()
+    } else {
+      innerSetupOpenAI()
+    }
   }, [config])
 
   // Observe sentences
@@ -298,9 +251,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   };
 
   const sendMessageAndSayResponseOpenAI = async text => {
-    if (assistant === null) {
-      await setupOpenAI();
-    }
     await openai.beta.threads.messages.create(thread.id, {
       role: 'user',
       content: text,
@@ -325,7 +275,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   };
 
   const sendMessageAlthea = text => {
-    sendTextPacket.streamSid = altheaStreamId;
+    sendTextPacket.streamSid = altheaStreamId.current;
     sendTextPacket.payload = text;
     socket.current.send(JSON.stringify(sendTextPacket));
   };
@@ -360,6 +310,69 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     assistant = await openai.beta.assistants.retrieve('asst_lnMDPoNTOlWcNHczrjaIqiaM');
     thread = await openai.beta.threads.create();
   };
+
+  const setupAlthea = () => {
+    const ws = new WebSocket(REACT_APP_ALTHEA_URL);
+    socket.current = ws;
+    ws.onopen = async () => {
+      if (altheaStreamId.current === null) {
+        const reportResponse = await fetch(REACT_APP_HOPPR_REPORTS_URL);
+        const allReports = await reportResponse.json();
+        const report = allReports[studyId];
+        if (report == null) {
+          await queueResponse('I was unable to find this particular study in our database.');
+          return;
+        }
+        let name = config['botName']
+        console.log('Setting up Althea as ' + name);
+        setupPacket.payload.receiveMode = 'text';
+        setupPacket.payload.responseMode = 'text';
+        setupPacket.payload.botName = name
+        setupPacket.payload.report = report;
+        // sending the init conditions
+        ws.send(JSON.stringify(setupPacket));
+        await queueResponse(
+          config['welcomeMessage'].replace('{botName}', name).replace('{modality}', instance.Modality),
+          false
+        )
+      } else {
+        console.log('Reconnecting to existing Althea session')
+        reconnectPacket.streamSid = altheaStreamId.current
+        ws.send(JSON.stringify(reconnectPacket))
+        await queueResponse(config['reconnectText'])
+      }
+      setConnected(true)
+    };
+
+    // websocket onclose event listener
+    ws.onclose = e => {
+      console.log('Althea socket closed ' + e);
+      setConnected(false)
+      setupAlthea()
+    };
+
+    // websocket onerror event listener
+    ws.onerror = error => {
+      console.error(
+        'WebSocket encountered error: ',
+        //@ts-ignore
+        error.message,
+        'Closing socket'
+      );
+
+      ws.close();
+    };
+    ws.onmessage = async evt => {
+      // on receiving a message from the server
+      const message = JSON.parse(evt.data);
+      if (message.event === 'start') {
+        console.log('Althea chat session ' + message.streamSid)
+        altheaStreamId.current = message.streamSid;
+      } else if (message.event === 'media') {
+        await handleAltheaResponse(message.media.payload);
+      }
+    };
+  }
 
   useEffect(() => {
     setIsDisabled(!connected || !isSentenceComplete[0] || !isSentenceComplete[1])
@@ -404,7 +417,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={isDisabled || searchInputField.length === 0}
+          disabled={isDisabled || searchInputField.trim().length === 0}
           onClick={() => {
             handleNewUserMessage(searchInputField);
           }}
