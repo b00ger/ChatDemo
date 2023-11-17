@@ -46,3 +46,4 @@ platform/app/.recipes/OpenResty-Orthanc/logs/*
 
 .vs
 extensions/default/src/ViewerLayout/components/Chat/env.js
+.vscode/

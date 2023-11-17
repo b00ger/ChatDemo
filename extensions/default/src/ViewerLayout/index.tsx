@@ -30,7 +30,7 @@ function ViewerLayout({
   const [showLoadingIndicator, setShowLoadingIndicator] = useState(appConfig.showLoadingIndicator);
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
-  const [title, setTitle] = useState('');
+  const [instance, setInstance] = useState(null);
   const [studyId, setStudyId] = useState(null);
   const [isDevMode, setDevMode] = useState(false)
 
@@ -92,35 +92,11 @@ function ViewerLayout({
       () => {
         console.log('changed-protocol-hangingservice');
         setShowLoadingIndicator(false);
-        const instance = hangingProtocolService.activeStudy?.series[0].instances[0];
-        let title = '';
+        const instance = hangingProtocolService.activeStudy?.series[0].instances[0]
         if (instance != null) {
-          const {
-            PatientSex,
-            PatientAge,
-            PatientName,
-            AcquisitionDate,
-            StudyInstanceUID,
-          } = instance;
-          setStudyId(StudyInstanceUID)
-          title += 'Patient: ' + PatientName;
-          if (PatientAge) {
-            title += ' | Age: ' + PatientAge;
-          }
-          if (PatientSex) {
-            title += ' | Sex: ' + PatientSex
-          }
-          if (AcquisitionDate) {
-            let date = new Date(
-              AcquisitionDate.slice(0, 4),
-              Number(AcquisitionDate.slice(4, 6)) - 1,
-              AcquisitionDate.slice(6, 8)
-            )
-            title +=
-              ' | Date: ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
-          }
+          setStudyId(instance.StudyInstanceUID)
         }
-        setTitle(title);
+        setInstance(instance);
       }
     );
 
@@ -169,8 +145,8 @@ function ViewerLayout({
             width={24}
           />
         </div>
-        {title.length > 0 && !isDevMode && <ChatBox title={title} studyId={studyId} />}
-        {isDevMode && <DevModePanel />}
+        {instance && !isDevMode && <ChatBox instance={instance} studyId={studyId} />}
+        {instance && isDevMode && <DevModePanel />}
       </div>
       <div className={'viewerPanel'}>
         <div

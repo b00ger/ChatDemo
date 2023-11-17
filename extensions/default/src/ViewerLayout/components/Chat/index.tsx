@@ -11,6 +11,7 @@ import {
   REACT_APP_ALTHEA_URL,
   REACT_APP_OPENAI_KEY,
   REACT_APP_HOPPR_REPORTS_URL,
+  REACT_APP_HOPPR_CONFIG,
   sendTextPacket,
   setupPacket,
 } from './env.js';
@@ -22,7 +23,7 @@ const {
   deleteMessages,
   dropMessages,
 } = Chat;
-const ChatSideBar = (opts: { title: string; studyId: string }) => {
+const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');
@@ -40,33 +41,73 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
   const handleNewUserMessage = newMessage => {
     sendMessage(newMessage);
   };
-  const { title, studyId } = opts;
+  const { instance, studyId } = opts;
+
+  let title = '';
+  if (instance != null) {
+    const {
+      PatientSex,
+      PatientAge,
+      PatientName,
+      AcquisitionDate,
+      StudyInstanceUID,
+    } = instance;
+    title += 'Patient: ' + PatientName;
+    if (PatientAge) {
+      title += ' | Age: ' + PatientAge;
+    }
+    if (PatientSex) {
+      title += ' | Sex: ' + PatientSex
+    }
+    if (AcquisitionDate) {
+      let date = new Date(
+        AcquisitionDate.slice(0, 4),
+        Number(AcquisitionDate.slice(4, 6)) - 1,
+        AcquisitionDate.slice(6, 8)
+      )
+      title +=
+        ' | Date: ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
+    }
+  }
 
   /// DAN H'S DANGER ZONE
 
-  const mode = 'althea';
+  const [mode, setMode] = useState('althea');
   const openai = new OpenAI({ apiKey: REACT_APP_OPENAI_KEY, dangerouslyAllowBrowser: true });
   const [recording, setRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
+  const socket = useRef(null)
   const [altheaText, setAltheaText] = useState('');
   const [finalText, setFinalText] = useState('');
   const [loading, setLoading] = useState(false);
   const [altheaStreamId, setAltheaStreamId] = useState(null);
-  const [socket, setSocket] = useState(null);
   const [sentences, setSentences] = useState([]);
   const [words, setWords] = useState([]);
   const [isSentenceComplete, setIsSentenceComplete] = useState([true, true]);
   const [messageId, setMessageId] = useState(null);
+  const [config, setConfig] = useState(null)
+  const [connected, setConnected] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(true)
   let thread = null;
   let assistant = null;
 
   useEffect(() => {
+    const loadConfig = async () => {
+      console.log('Loading config')
+      const response = await fetch(REACT_APP_HOPPR_CONFIG)
+      setConfig(await response.json())
+    }
+    loadConfig();
     dropMessages();
-    if (socket != null) {
+  }, []);
+
+  useEffect(() => {
+    if (config == null) {
       return;
     }
+    console.log('Config loaded. Starting chat experience.')
     const ws = new WebSocket(REACT_APP_ALTHEA_URL);
-    setSocket(ws);
+    socket.current = ws;
     ws.onopen = async () => {
       if (mode !== 'althea') {
         return;
@@ -79,13 +120,19 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
         queueResponse('I was unable to find this particular study in our database.');
         return;
       }
-
-      console.log('Setting up Althea');
+      let name = config['botName']
+      console.log('Setting up Althea as ' + name);
       setupPacket.payload.receiveMode = 'text';
       setupPacket.payload.responseMode = 'text';
+      setupPacket.payload.bot_name = name
       setupPacket.payload.report = report;
       // sending the init conditions
       ws.send(JSON.stringify(setupPacket));
+      setConnected(true)
+      await queueResponse(
+        config['welcomeMessage'].replace('{botName}', name).replace('{modality}', instance.Modality),
+        false
+      )
     };
 
     // websocket onclose event listener
@@ -113,31 +160,36 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
         await handleAltheaResponse(message.media.payload);
       }
     };
-  }, []);
+  }, [config])
 
   // Observe sentences
   useEffect(() => {
     function playNext(sentence) {
-      setIsSentenceComplete([false, false]);
       const text = sentence[0];
       console.log('Starting sentence ' + text);
-      const audio = new Audio(sentence[1]);
-      audio.onended = _ => {
-        console.log('Finished saying sentence ' + text);
-        setIsSentenceComplete(complete => {
-          if (!complete[1]) {
-            return [true, false];
-          }
-          if (complete[0]) {
-            return complete;
-          }
-          console.log('Popping sentence in audio');
-          setSentences(s => s.slice(1));
-          return [true, true];
-        });
-      };
+      const mp3 = sentence[1]
+      if (mp3 != null) {
+        setIsSentenceComplete([false, false]);
+        const audio = new Audio();
+        audio.onended = _ => {
+          console.log('Finished saying sentence ' + text);
+          setIsSentenceComplete(complete => {
+            if (!complete[1]) {
+              return [true, false];
+            }
+            if (complete[0]) {
+              return complete;
+            }
+            console.log('Popping sentence in audio');
+            setSentences(s => s.slice(1));
+            return [true, true];
+          });
+        };
+        audio.play();
+      } else {
+        setIsSentenceComplete([true, false]);
+      }
       setWords(prev => prev.concat(text.split(' ')));
-      audio.play();
     }
     setLoadingVisible(false);
     console.debug('There are now ' + sentences.length + ' sentences');
@@ -274,15 +326,15 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
     queueResponse(response);
   };
 
-  const queueResponse = async response => {
-    const speech = await createSpeechMp3(response);
+  const queueResponse = async (response, speak = true) => {
+    const speech = speak ? await createSpeechMp3(response) : null;
     setSentences(prev => [...prev, [response, speech]]);
   };
 
   const sendMessageAlthea = text => {
     sendTextPacket.streamSid = altheaStreamId;
     sendTextPacket.payload = text;
-    socket.send(JSON.stringify(sendTextPacket));
+    socket.current.send(JSON.stringify(sendTextPacket));
   };
 
   const handleAltheaResponse = async text => {
@@ -316,6 +368,10 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
     thread = await openai.beta.threads.create();
   };
 
+  useEffect(() => {
+    setIsDisabled(!connected || !isSentenceComplete[0] || !isSentenceComplete[1])
+  }, [connected, isSentenceComplete])
+
   /// END OF DAN H'S DANGER ZONE
 
   return (
@@ -329,7 +385,7 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
       />
       <div className="sendPanel">
         <button
-          disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
+          disabled={isDisabled}
           className="arbitrary micButton"
           onMouseDown={startRecording}
           onMouseUp={stopRecording}
@@ -348,14 +404,14 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
         >
           <input
             className={'textEntryComponent'}
-            disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
+            disabled={isDisabled}
             onChange={handleSearchInputChange}
             value={searchInputField}
           />
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={!isSentenceComplete[0] || !isSentenceComplete[1]}
+          disabled={isDisabled}
           onClick={() => {
             setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
@@ -365,8 +421,7 @@ const ChatSideBar = (opts: { title: string; studyId: string }) => {
         </button>
       </div>
       <div className="disclaimer">
-        This application is for research and development purposes only. <br />
-        HOPPR is not developing this application for clinical use.
+        {config && config['disclaimerText']}
       </div>
     </div>
   );
