@@ -123,7 +123,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         console.log('Starting audible sentence ' + text);
         setIsSentenceComplete([false, false]);
         const audio = new Audio(mp3);
-        audio.onended = _ => {
+        audio.addEventListener('ended', () => {
           console.log('Finished saying sentence ' + text);
           setIsSentenceComplete(complete => {
             if (!complete[1]) {
@@ -133,13 +133,13 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
               return complete;
             }
             console.log('Popping sentence in audio');
-            setSentences(s => s.slice(1));
+            setSentences(s => s.filter(i => i[0] !== text));
             return [true, true];
           });
-        };
+        }, {once: true})
         audio.play();
       } else {
-        console.log('Starting silent sentenc ' + text)
+        console.log('Starting silent sentence ' + text)
         setIsSentenceComplete([true, false]);
       }
       setWords(prev => prev.concat(text.split(' ')));
