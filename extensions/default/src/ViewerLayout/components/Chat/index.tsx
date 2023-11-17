@@ -261,7 +261,8 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   };
 
   const handleDataAvailable = async ({ data }) => {
-    if (data.size <= 0) {
+    if (data.size <= 10000) {
+      console.warn('Ignoring audio input because ' + data.size + ' bytes is less than the min threshold.')
       return;
     }
     console.log('Getting audio transcription');
@@ -403,7 +404,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         </form>
         <button
           className="arbitrary sendButton"
-          disabled={isDisabled}
+          disabled={isDisabled || searchInputField.length === 0}
           onClick={() => {
             setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
