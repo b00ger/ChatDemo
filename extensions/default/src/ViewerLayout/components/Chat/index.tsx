@@ -24,7 +24,6 @@ const {
 } = Chat;
 const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
-  const [speechToTextMode, setSpeechToTextMode] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');
 
   const customLauncher = launchChatMethod => {
@@ -154,6 +153,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       // on receiving a message from the server
       const message = JSON.parse(evt.data);
       if (message.event === 'start') {
+        console.log('Althea chat session ' + message.streamSid)
         setAltheaStreamId(message.streamSid);
       } else if (message.event === 'media') {
         await handleAltheaResponse(message.media.payload);
@@ -396,7 +396,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
           }}
         >
           <input
-            className={'textEntryComponent'}
+            className='textEntryComponent'
             disabled={!connected}
             onChange={handleSearchInputChange}
             value={searchInputField}
@@ -406,7 +406,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
           className="arbitrary sendButton"
           disabled={isDisabled || searchInputField.length === 0}
           onClick={() => {
-            setSpeechToTextMode(false);
             handleNewUserMessage(searchInputField);
           }}
         >
