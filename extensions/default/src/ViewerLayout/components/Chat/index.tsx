@@ -9,11 +9,10 @@ import MicIcon from './icons/mic';
 import TextMode from './icons/text';
 import {
   REACT_APP_ALTHEA_URL,
+  REACT_APP_ALTHEA_SECRET,
   REACT_APP_OPENAI_KEY,
   REACT_APP_HOPPR_REPORTS_URL,
   REACT_APP_HOPPR_CONFIG,
-  sendTextPacket,
-  setupPacket,
 } from './env.js';
 const {
   Widget,
@@ -124,7 +123,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       console.log('Setting up Althea as ' + name);
       setupPacket.payload.receiveMode = 'text';
       setupPacket.payload.responseMode = 'text';
-      setupPacket.payload.bot_name = name
+      setupPacket.payload.botName = name
       setupPacket.payload.report = report;
       // sending the init conditions
       ws.send(JSON.stringify(setupPacket));
@@ -245,14 +244,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     }
     showNext(words[0]);
   }, [words]);
-
-  const updateRecording = async () => {
-    if (recording) {
-      stopRecording();
-      return;
-    }
-    await startRecording();
-  };
 
   const startRecording = async () => {
     setAltheaText('');
@@ -424,6 +415,41 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       {config && <div className="disclaimer" dangerouslySetInnerHTML={{__html: config['disclaimerText']}} />}
     </div>
   );
+};
+
+export let setupPacket = {
+  event: "start",
+  payload: {
+    report: "This is a test report",
+    receiveMode: "voice",
+    responseMode: "voice",
+    username: "User",
+    botName: "Bot",
+  },
+  token: REACT_APP_ALTHEA_SECRET,
+};
+
+export let reconnectPacket = {
+  event: "reconnect",
+  token: REACT_APP_ALTHEA_SECRET,
+  streamSid: null,
+};
+
+export let sendTextPacket = {
+  streamSid: null,
+  event: "media",
+  payload: null,
+};
+
+export let sendAudioPacket = {
+  streamSid: null,
+  event: "media",
+  payload: null,
+};
+
+export let sendStopPacket = {
+  streamSid: null,
+  event: "stop",
 };
 
 export default ChatSideBar;

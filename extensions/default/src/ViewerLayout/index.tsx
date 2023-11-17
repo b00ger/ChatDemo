@@ -130,7 +130,7 @@ function ViewerLayout({
       />
       <div className={'sidePanel'}>
         <div className={'switchPanel'}>
-          <span className={'devSwitchLabel'}>Developer Mode</span>
+          <span className={'devSwitchLabel'}></span>
           <Switch
             onChange={handleEnvChange}
             checked={isDevMode}
