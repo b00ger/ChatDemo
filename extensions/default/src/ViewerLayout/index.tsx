@@ -146,7 +146,7 @@ function ViewerLayout({
           />
         </div>
         {instance && !isDevMode && <ChatBox instance={instance} studyId={studyId} />}
-        {instance && isDevMode && <DevModePanel />}
+        {instance && isDevMode && <DevModePanel instance={instance} studyId={studyId} />}
       </div>
       <div className={'viewerPanel'}>
         <div

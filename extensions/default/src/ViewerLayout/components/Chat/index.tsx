@@ -86,8 +86,8 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const [config, setConfig] = useState(null)
   const [connected, setConnected] = useState(false)
   const [isDisabled, setIsDisabled] = useState(true)
-  let thread = null;
-  let assistant = null;
+  const thread = useRef(null);
+  const assistant = useRef(null);
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -251,19 +251,19 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   };
 
   const sendMessageAndSayResponseOpenAI = async text => {
-    await openai.beta.threads.messages.create(thread.id, {
+    await openai.beta.threads.messages.create(thread.current.id, {
       role: 'user',
       content: text,
     });
-    const run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
+    const run = await openai.beta.threads.runs.create(thread.current.id, { assistant_id: assistant.current.id });
     while (true) {
-      const result = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      const result = await openai.beta.threads.runs.retrieve(thread.current.id, run.id);
       console.log(result.status);
       if (result.status === 'completed') {
         break;
       }
     }
-    const messages = await openai.beta.threads.messages.list(thread.id);
+    const messages = await openai.beta.threads.messages.list(thread.current.id);
     //@ts-ignore
     const response = messages.data[0].content[0].text.value;
     await queueResponse(response);
@@ -307,8 +307,8 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
 
   const setupOpenAI = async () => {
     console.log('Setting up for first time');
-    assistant = await openai.beta.assistants.retrieve('asst_lnMDPoNTOlWcNHczrjaIqiaM');
-    thread = await openai.beta.threads.create();
+    assistant.current = await openai.beta.assistants.retrieve('asst_lnMDPoNTOlWcNHczrjaIqiaM');
+    thread.current = await openai.beta.threads.create();
   };
 
   const setupAlthea = () => {
