@@ -68,8 +68,7 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
     }
     const messages = await openai.beta.threads.messages.list(thread.current.id);
     //@ts-ignore
-    // const response = messages.data[0].content[0].text.value.replace('```json', '').replace('```', '').trim();
-    const response = messages.data[0].content[0].text.value;
+    const response = messages.data[0].content[0].text.value.replace('```json', '').replace('```', '').trim();
     setCodeResponse(response)
   };
 
