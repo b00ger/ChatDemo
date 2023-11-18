@@ -13388,6 +13388,11 @@ lazy-universal-dotenv@^4.0.0:
     dotenv "^16.0.0"
     dotenv-expand "^10.0.0"
 
+ldrs@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ldrs/-/ldrs-1.0.1.tgz#38128d2e36f2b9321da171fbe4c532b656e8e28c"
+  integrity sha512-eeCP1XEG72Yz6JX50zlYWRJcEfNBrpp8QSzyjD3HHhxrnt4steLX4iDHF3Dezjbnnj5qtuJn7lr1nln+/kpUIQ==
+
 lerc@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/lerc/-/lerc-3.0.0.tgz"

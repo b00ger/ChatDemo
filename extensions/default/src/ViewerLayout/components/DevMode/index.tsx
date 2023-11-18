@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import OpenAI, { toFile } from 'openai';
+import {trio} from 'ldrs';
+trio.register()
+
 import './devmode.css';
 
 import {
@@ -15,6 +18,7 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
   const [searchInputField, setSearchInputField] = useState('')
   const [codeResponse, setCodeResponse] = useState(null);
   const [config, setConfig] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   const assistant = useRef(null)
   const thread = useRef(null)
 
@@ -54,6 +58,8 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
   };
 
   const sendMessage = async text => {
+    setCodeResponse(null)
+    setIsLoading(true)
     await openai.beta.threads.messages.create(thread.current.id, {
       role: 'user',
       content: text,
@@ -69,6 +75,7 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
     const messages = await openai.beta.threads.messages.list(thread.current.id);
     //@ts-ignore
     const response = messages.data[0].content[0].text.value.replace('```json', '').replace('```', '').trim();
+    setIsLoading(false)
     setCodeResponse(response)
   };
 
@@ -99,6 +106,13 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
           />
         </form>
       </div>
+      {isLoading && <div className='loadingContainer'>
+        <l-trio
+          size="40"
+          speed="1.3"
+          color="white"
+        />
+      </div>}
       {codeResponse && <div className='codeContainer'>
         <code>
           <pre>
