@@ -53,7 +53,7 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
     }
     await openai.beta.threads.messages.create(thread.current.id, {
       role: 'user',
-      content: 'The report is: ' + report,
+      content: 'The report is: ' + report[0],
     });
   };
 
