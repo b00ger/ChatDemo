@@ -366,6 +366,8 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       } else if (message.event === 'media') {
         console.debug('Althea message: ' + JSON.stringify(message))
         await handleAltheaResponse(message.media.payload);
+      } else if (message.event === 'error') {
+        await queueResponse('Something went wrong when I tried to process that request. Please try again.')
       } else {
         console.log('Received unhandled message of type ' + message.event + ' from Althea.')
       }
