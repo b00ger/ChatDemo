@@ -336,7 +336,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         ws.send(JSON.stringify(reconnectPacket))
         // await queueResponse(config['reconnectText'])
       }
-      setConnected(true)
     };
 
     // websocket onclose event listener
@@ -363,6 +362,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       if (message.event === 'start') {
         console.log('Althea chat session ' + message.streamSid)
         altheaStreamId.current = message.streamSid;
+        setConnected(true)
       } else if (message.event === 'media') {
         console.debug('Althea message: ' + JSON.stringify(message))
         await handleAltheaResponse(message.media.payload);
