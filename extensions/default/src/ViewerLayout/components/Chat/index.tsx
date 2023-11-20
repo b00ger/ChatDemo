@@ -68,6 +68,8 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const socket = useRef(null)
   const [altheaText, setAltheaText] = useState('');
   const [finalText, setFinalText] = useState('');
+  const firstSentence = useRef(null);
+  const firstSentencePlayed = useRef(false);
   const isLoadingVisible = useRef(false);
   const altheaStreamId = useRef(null)
   const [sentences, setSentences] = useState([]);
@@ -191,8 +193,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   }, [words]);
 
   const startRecording = async () => {
-    setAltheaText('');
-    setFinalText('');
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorderRef.current = new MediaRecorder(stream);
     mediaRecorderRef.current.addEventListener('dataavailable', handleDataAvailable);
@@ -231,7 +231,11 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     setSearchInputField('');
     setLoadingVisible(true);
     setMessageId(null);
+    setAltheaText('');
     setFinalText('');
+    firstSentence.current = null;
+    firstSentencePlayed.current = false;
+
     //@ts-ignore
     if (mode === 'openai') {
       await sendMessageAndSayResponseOpenAI(text);
@@ -261,6 +265,26 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
 
   const queueResponse = async (response, speak = true) => {
     const speech = speak ? await createSpeechMp3(response) : null;
+    if (speak && !firstSentencePlayed.current && firstSentence.current == null) {
+      console.log('Delaying first sentence: ' + JSON.stringify(response));
+      firstSentence.current = [response, speech];
+      setTimeout(() => {
+        if (firstSentence.current == null) {
+          return;
+        }
+        console.log('First sentence was never said and there are no more messages. Enqueing.')
+        setSentences(prev => [...prev, firstSentence.current]);
+        firstSentence.current = null;
+        firstSentencePlayed.current = true;
+      }, 2000);
+      return;
+    }
+    if (firstSentence.current != null) {
+      setSentences(prev => [...prev, firstSentence.current]);
+      console.log('Enqueuing delayed first sentence.')
+      firstSentence.current = null;
+      firstSentencePlayed.current = true;
+    }
     setSentences(prev => [...prev, [response, speech]]);
   };
 
