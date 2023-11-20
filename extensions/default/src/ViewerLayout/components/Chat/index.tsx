@@ -57,15 +57,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     if (PatientSex) {
       title += ' | Sex: ' + PatientSex
     }
-    if (AcquisitionDate) {
-      let date = new Date(
-        AcquisitionDate.slice(0, 4),
-        Number(AcquisitionDate.slice(4, 6)) - 1,
-        AcquisitionDate.slice(6, 8)
-      )
-      title +=
-        ' | Date: ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
-    }
   }
 
   /// DAN H'S DANGER ZONE
@@ -77,7 +68,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const socket = useRef(null)
   const [altheaText, setAltheaText] = useState('');
   const [finalText, setFinalText] = useState('');
-  const [loading, setLoading] = useState(false);
+  const isLoadingVisible = useRef(false);
   const altheaStreamId = useRef(null)
   const [sentences, setSentences] = useState([]);
   const [words, setWords] = useState([]);
@@ -120,11 +111,11 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       const text = sentence[0];
       const mp3 = sentence[1];
       if (mp3 != null) {
-        console.log('Starting audible sentence ' + text);
+        console.log('Starting audible sentence ' + JSON.stringify(text));
         setIsSentenceComplete([false, false]);
         const audio = new Audio(mp3);
         audio.addEventListener('ended', () => {
-          console.log('Finished saying sentence ' + text);
+          console.log('Finished saying sentence ' + JSON.stringify(text));
           setIsSentenceComplete(complete => {
             if (!complete[1]) {
               return [true, false];
@@ -139,7 +130,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         }, {once: true})
         audio.play();
       } else {
-        console.log('Starting silent sentence ' + text)
+        console.log('Starting silent sentence ' + JSON.stringify(text))
         setIsSentenceComplete([true, false]);
       }
       setWords(prev => prev.concat(text.split(' ')));
@@ -160,6 +151,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   // Observe individual words
   useEffect(() => {
     function showNext(word) {
+      console.debug('Adding word ' + JSON.stringify(word))
       setFinalText(prevMsg => {
         const text = prevMsg + word + ' ';
         setMessageId(id => {
@@ -228,12 +220,10 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   };
 
   const setLoadingVisible = visible => {
-    setLoading(prev => {
-      if (prev != visible) {
-        toggleMsgLoader();
-      }
-      return visible;
-    });
+    if (isLoadingVisible.current != visible) {
+      isLoadingVisible.current = visible
+      toggleMsgLoader()
+    }
   };
 
   const sendMessage = async text => {
@@ -286,8 +276,12 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       const newText = (await prevText) + text;
       const trimmed = text.trim();
       const lastChar = trimmed[trimmed.length - 1];
-      if (lastChar === '.' || lastChar === '?' || lastChar === '!') {
-        console.log('Adding sentence: ' + newText);
+      if (lastChar === '?' ||
+        lastChar === '!' ||
+        //@ts-ignore
+        (lastChar === '.' && (newText.length == 1 || isNaN(newText[newText.length - 2])))
+      ) {
+        console.log('Adding sentence: ' + JSON.stringify(newText));
         await queueResponse(newText);
         return '';
       }
@@ -340,7 +334,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         console.log('Reconnecting to existing Althea session')
         reconnectPacket.streamSid = altheaStreamId.current
         ws.send(JSON.stringify(reconnectPacket))
-        await queueResponse(config['reconnectText'])
+        // await queueResponse(config['reconnectText'])
       }
       setConnected(true)
     };
@@ -370,7 +364,10 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         console.log('Althea chat session ' + message.streamSid)
         altheaStreamId.current = message.streamSid;
       } else if (message.event === 'media') {
+        console.debug('Althea message: ' + JSON.stringify(message))
         await handleAltheaResponse(message.media.payload);
+      } else {
+        console.log('Received unhandled message of type ' + message.event + ' from Althea.')
       }
     };
   }

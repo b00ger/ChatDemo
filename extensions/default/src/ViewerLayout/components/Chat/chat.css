@@ -12,6 +12,11 @@
   border-radius: 0px;
   height: 100%;
 }
+.chatSidebar .rcw-conversation-container ol {
+  list-style: auto;
+  margin: auto;
+  padding: 0.5em 1em;
+}
 .chatSidebar .rcw-picker-btn {
   display: none;
 }
