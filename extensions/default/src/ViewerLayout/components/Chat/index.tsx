@@ -326,10 +326,6 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         setupPacket.payload.report = report;
         // sending the init conditions
         ws.send(JSON.stringify(setupPacket));
-        await queueResponse(
-          config['welcomeMessage'].replace('{botName}', name).replace('{modality}', instance.Modality),
-          false
-        )
       } else {
         console.log('Reconnecting to existing Althea session')
         reconnectPacket.streamSid = altheaStreamId.current
@@ -363,6 +359,10 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         console.log('Althea chat session ' + message.streamSid)
         altheaStreamId.current = message.streamSid;
         setConnected(true)
+        await queueResponse(
+          config['welcomeMessage'].replace('{botName}', config['botName']).replace('{modality}', instance.Modality),
+          false
+        )
       } else if (message.event === 'media') {
         console.debug('Althea message: ' + JSON.stringify(message))
         await handleAltheaResponse(message.media.payload);
