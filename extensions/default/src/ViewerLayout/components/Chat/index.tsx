@@ -332,6 +332,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         ws.send(JSON.stringify(reconnectPacket))
         // await queueResponse(config['reconnectText'])
       }
+      setLoadingVisible(true);
     };
 
     // websocket onclose event listener
