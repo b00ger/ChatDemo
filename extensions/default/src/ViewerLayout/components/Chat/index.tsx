@@ -137,11 +137,11 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
       }
       setWords(prev => prev.concat(text.split(' ')));
     }
-    setLoadingVisible(false);
     console.debug('There are now ' + sentences.length + ' sentences');
     if (sentences.length === 0) {
       return;
     }
+    setLoadingVisible(false);
     setIsSentenceComplete(complete => {
       if (complete[0] && complete[1]) {
         playNext(sentences[0]);
@@ -176,7 +176,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
     console.debug('There are now ' + words.length + ' words');
     if (words.length === 0) {
       setIsSentenceComplete(complete => {
-        console.log('Finished words for sentence');
+        console.debug('Finished words for sentence');
         if (!complete[0]) {
           return [false, true];
         }
@@ -221,8 +221,9 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
 
   const setLoadingVisible = visible => {
     if (isLoadingVisible.current != visible) {
-      isLoadingVisible.current = visible
-      toggleMsgLoader()
+      console.log('Changing loading animation visible ' + visible);
+      isLoadingVisible.current = visible;
+      toggleMsgLoader();
     }
   };
 
@@ -392,6 +393,7 @@ const ChatSideBar = (opts: { instance: any; studyId: string }) => {
         console.debug('Althea message: ' + JSON.stringify(message))
         await handleAltheaResponse(message.media.payload);
       } else if (message.event === 'error') {
+        setMessageId(null);
         await queueResponse('Something went wrong when I tried to process that request. Please try again.')
       } else {
         console.log('Received unhandled message of type ' + message.event + ' from Althea.')

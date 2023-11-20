@@ -19,6 +19,23 @@
   padding-left: 8px;
 }
 
+.devPanel .queryLabel {
+  margin-left: 16px;
+  font-size: 14px;
+}
+
+.devPanel .requestContainer {
+  background: #16161d;
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-bottom: 16px;
+  margin-top: 4px;
+  flex: 0 1 auto;
+  padding: 16px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
 .devPanel .codeContainer {
   background: #16161d;
   margin: 16px;

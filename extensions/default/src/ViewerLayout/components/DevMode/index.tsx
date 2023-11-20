@@ -16,11 +16,12 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
 
   const openai = new OpenAI({ apiKey: REACT_APP_OPENAI_KEY, dangerouslyAllowBrowser: true });
   const [searchInputField, setSearchInputField] = useState('')
+  const [codeRequest, setCodeRequest] = useState(null);
   const [codeResponse, setCodeResponse] = useState(null);
-  const [config, setConfig] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const assistant = useRef(null)
-  const thread = useRef(null)
+  const [config, setConfig] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const assistant = useRef(null);
+  const thread = useRef(null);
 
   // Init
   useEffect(() => {
@@ -59,6 +60,7 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
 
   const sendMessage = async text => {
     setCodeResponse(null)
+    setCodeRequest(text)
     setIsLoading(true)
     await openai.beta.threads.messages.create(thread.current.id, {
       role: 'user',
@@ -106,6 +108,12 @@ const DevModePanel = (opts: { instance: any; studyId: string }) => {
           />
         </form>
       </div>
+      {codeRequest && <div className='queryLabel'>Query:</div>}
+      {codeRequest && <div className='requestContainer'>
+        <code>
+          {codeRequest}
+        </code>
+      </div>}
       {isLoading && <div className='loadingContainer'>
         <l-trio
           size="40"
