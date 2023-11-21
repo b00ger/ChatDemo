@@ -60,8 +60,20 @@
     "@chatscope/chat-ui-kit-react": "^1.10.1",
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "@kitware/vtk.js": "27.3.1",
+    "@toycode/markdown-it-class": "^1.2.4",
+    "classnames": "2.2.6",
     "core-js": "^3.2.1",
-    "react-chat-widget": "^3.1.4"
+    "date-fns": "2.11.1",
+    "entities": "3.0.1",
+    "markdown-it": "13.0.2",
+    "markdown-it-link-attributes": "^2.1.0",
+    "markdown-it-sanitizer": "^0.4.3",
+    "markdown-it-sup": "^1.0.0",
+    "react-chat-widget": "^3.1.4",
+    "sass": "^1.69.5",
+    "sass-loader": "^13.3.2",
+    "react-redux": "^7.2.4",
+    "redux": "^4.1.0"
   },
   "peerDependencies": {
     "react": "17.0.2",

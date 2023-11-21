@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import * as Chat from './lib/index.js';
 import OpenAI, { toFile } from 'openai';
-import './lib/styles.css';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import './chat.css';
@@ -14,14 +13,15 @@ import {
   REACT_APP_HOPPR_REPORTS_URL,
   REACT_APP_HOPPR_CONFIG,
 } from './env.js';
-const {
-  Widget,
+import Widget from './src/index';
+
+import {
   addResponseMessage,
   addUserMessage,
   toggleMsgLoader,
   deleteMessages,
   dropMessages,
-} = Chat;
+} from './src/store/dispatcher';
 const ChatSideBar = (opts: { instance: any; studyId: string }) => {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [searchInputField, setSearchInputField] = useState('');

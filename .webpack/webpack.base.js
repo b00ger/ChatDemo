@@ -99,6 +99,17 @@ module.exports = (env, argv, { SRC_DIR, ENTRY }) => {
       noParse: [/(codec)/, /(dicomicc)/],
       rules: [
         {
+          test: /\.s[ac]ss$/i,
+          use: [
+            // Creates `style` nodes from JS strings
+            "style-loader",
+            // Translates CSS into CommonJS
+            "css-loader",
+            // Compiles Sass to CSS
+            "sass-loader",
+          ],
+        },
+        {
           test: /\.js$/,
           enforce: 'pre',
           use: 'source-map-loader',
@@ -147,7 +158,7 @@ module.exports = (env, argv, { SRC_DIR, ENTRY }) => {
         SRC_DIR,
       ],
       // Attempt to resolve these extensions in order.
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx', '*'],
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx', '.*'],
       // symlinked resources are resolved to their real path, not their symlinked location
       symlinks: true,
       fallback: {
